@@ -1,0 +1,7 @@
+{
+    "[go]": {
+        "editor.formatOnSave": true,
+        "editor.insertSpaces": true,
+        "editor.defaultFormatter": "golang.go",
+    }
+}
