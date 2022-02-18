@@ -45,5 +45,12 @@ func main() {
 		router.Delete("/:username", apiEnv.DeleteUserHandler())
 	})
 
+	app.Route("/books", func(router fiber.Router) {
+		router.Post("", apiEnv.CreateBookHandler())
+		router.Get("/:slug?", apiEnv.GetBookHandler())
+		router.Put("/:slug", apiEnv.UpdateBookHandler())
+		router.Delete("/:slug", apiEnv.DeleteBookHandler())
+	})
+
 	log.Fatal(app.Listen(":4000"))
 }

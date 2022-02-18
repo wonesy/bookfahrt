@@ -3,7 +3,6 @@ package api_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http/httptest"
 	"testing"
@@ -142,8 +141,6 @@ func TestCreateGetUserHandler(t *testing.T) {
 	b, _ := io.ReadAll(resp.Body)
 	var newUser *ent.User
 	json.Unmarshal(b, &newUser)
-
-	fmt.Println(newUser)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 200, resp.StatusCode)
