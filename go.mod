@@ -6,6 +6,7 @@ require (
 	entgo.io/ent v0.10.0
 	github.com/gofiber/fiber/v2 v2.27.0
 	github.com/google/uuid v1.3.0
+	github.com/jinzhu/copier v0.3.5
 	github.com/lib/pq v1.10.4
 	github.com/mattn/go-sqlite3 v1.14.11
 	github.com/stretchr/testify v1.7.1-0.20210427113832-6241f9ab9942
@@ -20,7 +21,6 @@ require (
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/hashicorp/hcl/v2 v2.10.0 // indirect
-	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/klauspost/compress v1.14.2 // indirect
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
