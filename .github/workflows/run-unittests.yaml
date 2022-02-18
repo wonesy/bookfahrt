@@ -1,0 +1,8 @@
+name: Run unit tests
+on: [push]
+jobs:
+  bookfahrt-unit-tests:
+    container: golang:1.17.7-buster
+    steps:
+      - go mod download
+      - go test ./...
