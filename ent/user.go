@@ -23,7 +23,7 @@ type User struct {
 	// LastName holds the value of the "last_name" field.
 	LastName string `json:"last_name,omitempty"`
 	// Password holds the value of the "password" field.
-	Password string `json:"password,omitempty"`
+	Password string `json:"-"`
 	// Email holds the value of the "email" field.
 	Email string `json:"email,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -166,8 +166,7 @@ func (u *User) String() string {
 	builder.WriteString(u.FirstName)
 	builder.WriteString(", last_name=")
 	builder.WriteString(u.LastName)
-	builder.WriteString(", password=")
-	builder.WriteString(u.Password)
+	builder.WriteString(", password=<sensitive>")
 	builder.WriteString(", email=")
 	builder.WriteString(u.Email)
 	builder.WriteString(", created_at=")

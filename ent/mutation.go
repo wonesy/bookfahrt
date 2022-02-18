@@ -2016,22 +2016,9 @@ func (m *UserMutation) OldLastLoginAt(ctx context.Context) (v time.Time, err err
 	return oldValue.LastLoginAt, nil
 }
 
-// ClearLastLoginAt clears the value of the "last_login_at" field.
-func (m *UserMutation) ClearLastLoginAt() {
-	m.last_login_at = nil
-	m.clearedFields[user.FieldLastLoginAt] = struct{}{}
-}
-
-// LastLoginAtCleared returns if the "last_login_at" field was cleared in this mutation.
-func (m *UserMutation) LastLoginAtCleared() bool {
-	_, ok := m.clearedFields[user.FieldLastLoginAt]
-	return ok
-}
-
 // ResetLastLoginAt resets all changes to the "last_login_at" field.
 func (m *UserMutation) ResetLastLoginAt() {
 	m.last_login_at = nil
-	delete(m.clearedFields, user.FieldLastLoginAt)
 }
 
 // AddClubIDs adds the "clubs" edge to the Club entity by ids.
@@ -2271,9 +2258,6 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldEmail) {
 		fields = append(fields, user.FieldEmail)
 	}
-	if m.FieldCleared(user.FieldLastLoginAt) {
-		fields = append(fields, user.FieldLastLoginAt)
-	}
 	return fields
 }
 
@@ -2296,9 +2280,6 @@ func (m *UserMutation) ClearField(name string) error {
 		return nil
 	case user.FieldEmail:
 		m.ClearEmail()
-		return nil
-	case user.FieldLastLoginAt:
-		m.ClearLastLoginAt()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)

@@ -69,4 +69,6 @@ var (
 	PasswordValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
+	// DefaultLastLoginAt holds the default value on creation for the "last_login_at" field.
+	DefaultLastLoginAt func() time.Time
 )

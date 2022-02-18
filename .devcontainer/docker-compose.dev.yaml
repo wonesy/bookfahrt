@@ -11,6 +11,7 @@ services:
     command: /bin/sh -c "while sleep 100000; do :; done"
   bkdb:
     image: postgres:latest
+    container_name: bookfahrt-db
     ports:
       - "5432:5432"
     env_file: dev.env

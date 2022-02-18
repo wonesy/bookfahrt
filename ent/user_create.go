@@ -196,6 +196,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultCreatedAt()
 		uc.mutation.SetCreatedAt(v)
 	}
+	if _, ok := uc.mutation.LastLoginAt(); !ok {
+		v := user.DefaultLastLoginAt()
+		uc.mutation.SetLastLoginAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -213,6 +217,9 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
+	}
+	if _, ok := uc.mutation.LastLoginAt(); !ok {
+		return &ValidationError{Name: "last_login_at", err: errors.New(`ent: missing required field "User.last_login_at"`)}
 	}
 	return nil
 }
@@ -473,12 +480,6 @@ func (u *UserUpsert) UpdateLastLoginAt() *UserUpsert {
 	return u
 }
 
-// ClearLastLoginAt clears the value of the "last_login_at" field.
-func (u *UserUpsert) ClearLastLoginAt() *UserUpsert {
-	u.SetNull(user.FieldLastLoginAt)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -637,13 +638,6 @@ func (u *UserUpsertOne) SetLastLoginAt(v time.Time) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateLastLoginAt() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateLastLoginAt()
-	})
-}
-
-// ClearLastLoginAt clears the value of the "last_login_at" field.
-func (u *UserUpsertOne) ClearLastLoginAt() *UserUpsertOne {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearLastLoginAt()
 	})
 }
 
@@ -967,13 +961,6 @@ func (u *UserUpsertBulk) SetLastLoginAt(v time.Time) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateLastLoginAt() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateLastLoginAt()
-	})
-}
-
-// ClearLastLoginAt clears the value of the "last_login_at" field.
-func (u *UserUpsertBulk) ClearLastLoginAt() *UserUpsertBulk {
-	return u.Update(func(s *UserUpsert) {
-		s.ClearLastLoginAt()
 	})
 }
 

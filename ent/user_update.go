@@ -130,12 +130,6 @@ func (uu *UserUpdate) SetNillableLastLoginAt(t *time.Time) *UserUpdate {
 	return uu
 }
 
-// ClearLastLoginAt clears the value of the "last_login_at" field.
-func (uu *UserUpdate) ClearLastLoginAt() *UserUpdate {
-	uu.mutation.ClearLastLoginAt()
-	return uu
-}
-
 // AddClubIDs adds the "clubs" edge to the Club entity by IDs.
 func (uu *UserUpdate) AddClubIDs(ids ...uuid.UUID) *UserUpdate {
 	uu.mutation.AddClubIDs(ids...)
@@ -332,12 +326,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldLastLoginAt,
 		})
 	}
-	if uu.mutation.LastLoginAtCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: user.FieldLastLoginAt,
-		})
-	}
 	if uu.mutation.ClubsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -508,12 +496,6 @@ func (uuo *UserUpdateOne) SetNillableLastLoginAt(t *time.Time) *UserUpdateOne {
 	if t != nil {
 		uuo.SetLastLoginAt(*t)
 	}
-	return uuo
-}
-
-// ClearLastLoginAt clears the value of the "last_login_at" field.
-func (uuo *UserUpdateOne) ClearLastLoginAt() *UserUpdateOne {
-	uuo.mutation.ClearLastLoginAt()
 	return uuo
 }
 
@@ -734,12 +716,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: user.FieldLastLoginAt,
-		})
-	}
-	if uuo.mutation.LastLoginAtCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
 			Column: user.FieldLastLoginAt,
 		})
 	}

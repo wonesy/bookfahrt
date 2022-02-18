@@ -891,20 +891,6 @@ func LastLoginAtLTE(v time.Time) predicate.User {
 	})
 }
 
-// LastLoginAtIsNil applies the IsNil predicate on the "last_login_at" field.
-func LastLoginAtIsNil() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldLastLoginAt)))
-	})
-}
-
-// LastLoginAtNotNil applies the NotNil predicate on the "last_login_at" field.
-func LastLoginAtNotNil() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldLastLoginAt)))
-	})
-}
-
 // HasClubs applies the HasEdge predicate on the "clubs" edge.
 func HasClubs() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
