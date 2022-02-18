@@ -1,6 +1,11 @@
 package api_test
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/jinzhu/copier"
@@ -8,6 +13,7 @@ import (
 	"github.com/wonesy/bookfahrt/api"
 	"github.com/wonesy/bookfahrt/ent"
 	"github.com/wonesy/bookfahrt/ent/enttest"
+	"github.com/wonesy/bookfahrt/testhelpers"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -89,4 +95,71 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 	num, err := apiEnv.DeleteUser("test-username")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, num)
+}
+
+func TestGetUserHandler(t *testing.T) {
+	app := testhelpers.NewTestApp(t)
+
+	req := httptest.NewRequest("GET", "/users", nil)
+
+	resp, err := app.Test(req, 1)
+
+	b, _ := io.ReadAll(resp.Body)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+	assert.Equal(t, "[]", string(b))
+}
+
+func TestCreateGetUserHandler(t *testing.T) {
+	type payload struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	app := testhelpers.NewTestApp(t)
+
+	defer func() {
+		req := httptest.NewRequest("DELETE", "/users/username", nil)
+		app.Test(req, 1)
+	}()
+
+	//
+	// Create a new user
+	//
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(payload{
+		Username: "username",
+		Password: "password",
+	})
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest("POST", "/users", &buf)
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := app.Test(req, 1)
+
+	b, _ := io.ReadAll(resp.Body)
+	var newUser *ent.User
+	json.Unmarshal(b, &newUser)
+
+	fmt.Println(newUser)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+	assert.Contains(t, string(b), "\"username\":\"username\"")
+
+	//
+	// Get all users
+	//
+	req = httptest.NewRequest("GET", "/users", nil)
+	resp, err = app.Test(req, 1)
+
+	assert.NoError(t, err)
+	b, _ = io.ReadAll(resp.Body)
+	var allUsers []*ent.User
+	json.Unmarshal(b, &allUsers)
+
+	assert.Equal(t, 1, len(allUsers))
+	assert.Equal(t, "username", allUsers[0].Username)
 }
