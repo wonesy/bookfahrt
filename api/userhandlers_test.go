@@ -9,18 +9,14 @@ import (
 
 	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/assert"
-	"github.com/wonesy/bookfahrt/api"
 	"github.com/wonesy/bookfahrt/ent"
-	"github.com/wonesy/bookfahrt/ent/enttest"
 	"github.com/wonesy/bookfahrt/testhelpers"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestCreateDeleteUser(t *testing.T) {
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
-
-	apiEnv := api.NewApiEnv(client)
+	apiEnv := testhelpers.NewTestApiEnv(t)
 
 	newUser := &ent.User{
 		Username:  "test-username",
@@ -50,9 +46,7 @@ func TestCreateDeleteUser(t *testing.T) {
 }
 
 func TestCreateUpdateDeleteUser(t *testing.T) {
-	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
-
-	apiEnv := api.NewApiEnv(client)
+	apiEnv := testhelpers.NewTestApiEnv(t)
 
 	newUser := &ent.User{
 		Username:  "test-username",
@@ -136,13 +130,13 @@ func TestCreateGetUserHandler(t *testing.T) {
 	req := httptest.NewRequest("POST", "/users", &buf)
 	req.Header.Add("Content-Type", "application/json")
 
-	resp, err := app.Test(req, 1)
+	resp, err2 := app.Test(req, -1)
+	assert.NoError(t, err2)
 
 	b, _ := io.ReadAll(resp.Body)
 	var newUser *ent.User
 	json.Unmarshal(b, &newUser)
 
-	assert.NoError(t, err)
 	assert.Equal(t, 200, resp.StatusCode)
 	assert.Contains(t, string(b), "\"username\":\"username\"")
 
@@ -159,4 +153,5 @@ func TestCreateGetUserHandler(t *testing.T) {
 
 	assert.Equal(t, 1, len(allUsers))
 	assert.Equal(t, "username", allUsers[0].Username)
+	assert.NotEqual(t, "password", allUsers[0].Password)
 }

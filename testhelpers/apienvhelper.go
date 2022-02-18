@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/wonesy/bookfahrt/api"
 	"github.com/wonesy/bookfahrt/ent/enttest"
 )
@@ -11,7 +12,7 @@ import (
 func NewTestApiEnv(t *testing.T) *api.ApiEnv {
 	client := enttest.Open(t, "sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
 
-	return api.NewApiEnv(client)
+	return api.NewApiEnv(client, session.New())
 }
 
 func NewTestApp(t *testing.T) *fiber.App {

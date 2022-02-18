@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Book holds the schema definition for the Book entity.
@@ -24,5 +25,11 @@ func (Book) Fields() []ent.Field {
 func (Book) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("genres", Genre.Type),
+	}
+}
+
+func (Book) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("title", "author").Unique(),
 	}
 }

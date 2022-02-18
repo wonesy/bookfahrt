@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/wonesy/bookfahrt/auth"
 	"github.com/wonesy/bookfahrt/ent"
 	"github.com/wonesy/bookfahrt/ent/user"
 )
@@ -67,7 +68,6 @@ func (e *ApiEnv) GetUserHandler() func(c *fiber.Ctx) error {
 }
 
 func (e *ApiEnv) CreateUserHandler() func(c *fiber.Ctx) error {
-
 	type bodyPassword struct {
 		Password string `json:"password"`
 	}
@@ -80,13 +80,18 @@ func (e *ApiEnv) CreateUserHandler() func(c *fiber.Ctx) error {
 			return err
 		}
 
+		hashedPass, err := auth.HashPassword(pw.Password)
+		if err != nil {
+			return err
+		}
+
 		// because password is a sensitive field, it isn't encoded
 		// automatically. It must be manually injected into the obj
 		if err := c.BodyParser(user); err != nil {
 			return err
 		}
 
-		user.Password = pw.Password
+		user.Password = hashedPass
 
 		newUser, err := e.CreateUser(user)
 		if err != nil {

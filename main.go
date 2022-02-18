@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	_ "github.com/lib/pq"
 	"github.com/wonesy/bookfahrt/api"
 	"github.com/wonesy/bookfahrt/ent"
@@ -33,10 +34,12 @@ func initDb() *ent.Client {
 
 func main() {
 	app := fiber.New()
+	store := session.New()
+
 	client := initDb()
 	defer client.Close()
 
-	apiEnv := api.NewApiEnv(client)
+	apiEnv := api.NewApiEnv(client, store)
 
 	app.Route("/users", func(router fiber.Router) {
 		router.Post("", apiEnv.CreateUserHandler())

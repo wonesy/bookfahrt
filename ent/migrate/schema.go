@@ -20,6 +20,13 @@ var (
 		Name:       "books",
 		Columns:    BooksColumns,
 		PrimaryKey: []*schema.Column{BooksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "book_title_author",
+				Unique:  true,
+				Columns: []*schema.Column{BooksColumns[1], BooksColumns[2]},
+			},
+		},
 	}
 	// ClubsColumns holds the columns for the "clubs" table.
 	ClubsColumns = []*schema.Column{
