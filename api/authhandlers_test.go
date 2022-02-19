@@ -73,12 +73,7 @@ func TestLogout(t *testing.T) {
 	pw := "pass"
 
 	app, apienv := testhelpers.NewTestTools(t)
-
-	defer func() {
-		url := fmt.Sprintf("/users/%s", un)
-		req := httptest.NewRequest("DELETE", url, nil)
-		app.Test(req, 1)
-	}()
+	defer testhelpers.WipeDB(apienv)
 
 	// create a new user with a new password
 	hashed, _ := auth.HashPassword(pw)

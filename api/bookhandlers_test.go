@@ -11,6 +11,8 @@ import (
 
 func TestCreateDeleteBook(t *testing.T) {
 	apiEnv := testhelpers.NewTestApiEnv(t)
+	defer testhelpers.WipeDB(apiEnv)
+
 	book := &ent.Book{
 		Title:  "test title 123 ^& something",
 		Author: "test author",
@@ -72,6 +74,7 @@ func TestCreateUpdateDeleteBook(t *testing.T) {
 
 func TestCreateGetBook(t *testing.T) {
 	apiEnv := testhelpers.NewTestApiEnv(t)
+	defer testhelpers.WipeDB(apiEnv)
 
 	// assert we start out fresh
 	books, err := apiEnv.GetAllBooks()

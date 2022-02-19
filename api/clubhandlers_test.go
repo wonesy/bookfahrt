@@ -17,6 +17,7 @@ import (
 
 func TestLoginAndJoinClubHandlers(t *testing.T) {
 	app, env := testhelpers.NewTestTools(t)
+	defer testhelpers.WipeDB(env)
 
 	// create a club
 	createdClub, err := env.CreateClub(&ent.Club{Name: "daclub"})

@@ -45,6 +45,8 @@ func TestCreateDeleteUser(t *testing.T) {
 	num, err := apiEnv.DeleteUser("test-username")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, num)
+
+	testhelpers.WipeDB(apiEnv)
 }
 
 func TestCreateUpdateDeleteUser(t *testing.T) {
@@ -87,20 +89,24 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 	num, err := apiEnv.DeleteUser("test-username")
 	assert.NoError(t, err)
 	assert.Equal(t, 1, num)
+
+	testhelpers.WipeDB(apiEnv)
 }
 
 func TestGetUserHandler(t *testing.T) {
-	app, _ := testhelpers.NewTestTools(t)
+	app, apiEnv := testhelpers.NewTestTools(t)
 
 	req := httptest.NewRequest("GET", "/users", nil)
 
-	resp, err := app.Test(req, 1)
+	resp, err := app.Test(req, -1)
 
 	b, _ := io.ReadAll(resp.Body)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 200, resp.StatusCode)
 	assert.Equal(t, "[]", string(b))
+
+	testhelpers.WipeDB(apiEnv)
 }
 
 func TestCreateGetUserHandler(t *testing.T) {
@@ -109,12 +115,8 @@ func TestCreateGetUserHandler(t *testing.T) {
 		Password string `json:"password"`
 	}
 
-	app, _ := testhelpers.NewTestTools(t)
-
-	defer func() {
-		req := httptest.NewRequest("DELETE", "/users/username", nil)
-		app.Test(req, -1)
-	}()
+	app, apiEnv := testhelpers.NewTestTools(t)
+	defer testhelpers.WipeDB(apiEnv)
 
 	//
 	// Create a new user
@@ -157,6 +159,9 @@ func TestCreateGetUserHandler(t *testing.T) {
 
 func TestUpdateUserWithClub(t *testing.T) {
 	env := testhelpers.NewTestApiEnv(t)
+	defer func() {
+		testhelpers.WipeDB(env)
+	}()
 
 	createdClub, err := env.CreateClub(&ent.Club{
 		Name: "Cameron's Club",

@@ -73,6 +73,7 @@ func (e *ApiEnv) GetUserHandler() func(c *fiber.Ctx) error {
 			if err != nil {
 				return err
 			}
+			fmt.Println(users)
 			return c.JSON(users)
 		}
 

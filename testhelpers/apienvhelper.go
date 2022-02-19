@@ -1,6 +1,7 @@
 package testhelpers
 
 import (
+	"context"
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
@@ -23,4 +24,12 @@ func NewTestTools(t *testing.T) (*fiber.App, *api.ApiEnv) {
 	app.Route("/auth", apiEnv.InitAuthRouter())
 	app.Route("clubs", apiEnv.InitClubRouter())
 	return app, apiEnv
+}
+
+func WipeDB(e *api.ApiEnv) {
+	ctx := context.Background()
+
+	e.Client.User.Delete().Exec(ctx)
+	e.Client.Book.Delete().Exec(ctx)
+	e.Client.Club.Delete().Exec(ctx)
 }
