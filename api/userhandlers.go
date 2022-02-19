@@ -11,6 +11,15 @@ import (
 	"github.com/wonesy/bookfahrt/ent/user"
 )
 
+func (e *ApiEnv) InitUserRouter() func(fiber.Router) {
+	return func(router fiber.Router) {
+		router.Post("", e.CreateUserHandler())
+		router.Get("/:username?", e.GetUserHandler())
+		router.Put("/:username", e.UpdateUserHandler())
+		router.Delete("/:username", e.DeleteUserHandler())
+	}
+}
+
 func (e *ApiEnv) GetAllUsers() ([]*ent.User, error) {
 	return e.Client.User.Query().All(context.Background())
 }

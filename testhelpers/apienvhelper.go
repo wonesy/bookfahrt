@@ -15,14 +15,11 @@ func NewTestApiEnv(t *testing.T) *api.ApiEnv {
 	return api.NewApiEnv(client, session.New())
 }
 
-func NewTestApp(t *testing.T) *fiber.App {
+func NewTestTools(t *testing.T) (*fiber.App, *api.ApiEnv) {
 	apiEnv := NewTestApiEnv(t)
 	app := fiber.New()
-	app.Route("/users", func(router fiber.Router) {
-		router.Post("", apiEnv.CreateUserHandler())
-		router.Get("/:username?", apiEnv.GetUserHandler())
-		router.Put("/:username", apiEnv.UpdateUserHandler())
-		router.Delete("/:username", apiEnv.DeleteUserHandler())
-	})
-	return app
+	app.Route("/users", apiEnv.InitUserRouter())
+	app.Route("/books", apiEnv.InitBookRouter())
+	app.Route("/auth", apiEnv.InitAuthRouter())
+	return app, apiEnv
 }

@@ -4,7 +4,7 @@
         "editor.insertSpaces": true,
         "editor.defaultFormatter": "golang.go",
     },
-    "go.coverOnSave": true,
+    "go.coverOnSave": false,
     "go.coverageDecorator": {
         "type": "gutter",
         "coveredHighlightColor": "rgba(64,128,128,0.5)",

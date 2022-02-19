@@ -91,7 +91,7 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 }
 
 func TestGetUserHandler(t *testing.T) {
-	app := testhelpers.NewTestApp(t)
+	app, _ := testhelpers.NewTestTools(t)
 
 	req := httptest.NewRequest("GET", "/users", nil)
 
@@ -110,7 +110,7 @@ func TestCreateGetUserHandler(t *testing.T) {
 		Password string `json:"password"`
 	}
 
-	app := testhelpers.NewTestApp(t)
+	app, _ := testhelpers.NewTestTools(t)
 
 	defer func() {
 		req := httptest.NewRequest("DELETE", "/users/username", nil)

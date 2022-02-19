@@ -10,6 +10,15 @@ import (
 	"github.com/wonesy/bookfahrt/ent/book"
 )
 
+func (e *ApiEnv) InitBookRouter() func(fiber.Router) {
+	return func(router fiber.Router) {
+		router.Post("", e.CreateBookHandler())
+		router.Get("/:slug?", e.GetBookHandler())
+		router.Put("/:slug", e.UpdateBookHandler())
+		router.Delete("/:slug", e.DeleteBookHandler())
+	}
+}
+
 func (e *ApiEnv) GetAllBooks() ([]*ent.Book, error) {
 	return e.Client.Book.Query().All(context.Background())
 }

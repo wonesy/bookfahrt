@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	_ "github.com/lib/pq"
 	"github.com/wonesy/bookfahrt/api"
@@ -33,27 +34,20 @@ func initDb() *ent.Client {
 }
 
 func main() {
+	// init
 	app := fiber.New()
 	store := session.New()
-
 	client := initDb()
 	defer client.Close()
-
 	apiEnv := api.NewApiEnv(client, store)
 
-	app.Route("/users", func(router fiber.Router) {
-		router.Post("", apiEnv.CreateUserHandler())
-		router.Get("/:username?", apiEnv.GetUserHandler())
-		router.Put("/:username", apiEnv.UpdateUserHandler())
-		router.Delete("/:username", apiEnv.DeleteUserHandler())
-	})
+	// middleware
+	app.Use(recover.New())
 
-	app.Route("/books", func(router fiber.Router) {
-		router.Post("", apiEnv.CreateBookHandler())
-		router.Get("/:slug?", apiEnv.GetBookHandler())
-		router.Put("/:slug", apiEnv.UpdateBookHandler())
-		router.Delete("/:slug", apiEnv.DeleteBookHandler())
-	})
+	// routers
+	app.Route("/auth", apiEnv.InitAuthRouter())
+	app.Route("/users", apiEnv.InitUserRouter())
+	app.Route("/books", apiEnv.InitBookRouter())
 
 	log.Fatal(app.Listen(":4000"))
 }
