@@ -136,7 +136,7 @@ func (e *ApiEnv) JoinClubHandler() func(c *fiber.Ctx) error {
 			return errors.Wrap(err, "JoinClubHandler parsing uuid failed")
 		}
 
-		_, err = user.Update().AddClubIDs(parsedID).Save(context.Background())
+		_, err = e.UpdateUser(user, parsedID)
 		return err
 	}
 }

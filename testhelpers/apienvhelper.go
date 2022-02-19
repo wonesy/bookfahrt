@@ -21,5 +21,6 @@ func NewTestTools(t *testing.T) (*fiber.App, *api.ApiEnv) {
 	app.Route("/users", apiEnv.InitUserRouter())
 	app.Route("/books", apiEnv.InitBookRouter())
 	app.Route("/auth", apiEnv.InitAuthRouter())
+	app.Route("clubs", apiEnv.InitClubRouter())
 	return app, apiEnv
 }

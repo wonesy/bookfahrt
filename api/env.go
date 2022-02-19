@@ -25,10 +25,10 @@ func (e *ApiEnv) GetSessionUser(c *fiber.Ctx) (*ent.User, error) {
 		return nil, errors.Wrap(err, "session fetching store failed")
 	}
 
-	user, ok := sess.Get("user").(*ent.User)
+	user, ok := sess.Get("user").(ent.User)
 	if !ok {
 		return nil, errors.New("session invalid user object in store")
 	}
 
-	return user, nil
+	return &user, nil
 }

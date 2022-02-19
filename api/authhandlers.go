@@ -18,8 +18,8 @@ func (e *ApiEnv) InitAuthRouter() func(fiber.Router) {
 
 func (e *ApiEnv) LoginHandler() func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
-		var creds auth.Credentials
-		if err := c.BodyParser(&creds); err != nil {
+		creds := new(auth.Credentials)
+		if err := c.BodyParser(creds); err != nil {
 			return err
 		}
 
