@@ -23,6 +23,6 @@ func (Club) Fields() []ent.Field {
 // Edges of the Club.
 func (Club) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("members", User.Type).Ref("memberOf"),
+		edge.From("members", User.Type).Ref("clubs"),
 	}
 }

@@ -32,23 +32,30 @@ func (e *ApiEnv) GetUserByUsername(username string) (*ent.User, error) {
 		Only(context.Background())
 }
 
-func (e *ApiEnv) CreateUser(user *ent.User, clubID uuid.UUID) (*ent.User, error) {
+func (e *ApiEnv) CreateUser(user *ent.User, clubID ...uuid.UUID) (*ent.User, error) {
 	return e.Client.User.Create().
 		SetUsername(user.Username).
 		SetFirstName(user.FirstName).
 		SetLastName(user.LastName).
 		SetEmail(user.Email).
 		SetPassword(user.Password).
+		AddClubIDs(clubID...).
 		Save(context.Background())
 }
 
-func (e *ApiEnv) UpdateUser(u *ent.User) (int, error) {
-	return e.Client.User.Update().
+func (e *ApiEnv) UpdateUser(u *ent.User, clubs ...uuid.UUID) (*ent.User, error) {
+	_, err := e.Client.User.Update().
 		Where(user.UsernameEQ(u.Username)).
 		SetEmail(u.Email).
 		SetFirstName(u.FirstName).
 		SetLastName(u.LastName).
+		AddClubIDs(clubs...).
 		Save(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return e.GetUserByUsername(u.Username)
 }
 
 func (e *ApiEnv) DeleteUser(username string) (int, error) {
@@ -91,8 +98,6 @@ func (e *ApiEnv) CreateUserHandler() func(c *fiber.Ctx) error {
 			return err
 		}
 
-		fmt.Println(body.Password)
-
 		hashedPass, err := auth.HashPassword(body.Password)
 		if err != nil {
 			return err
@@ -106,7 +111,7 @@ func (e *ApiEnv) CreateUserHandler() func(c *fiber.Ctx) error {
 
 		user.Password = hashedPass
 
-		newUser, err := e.CreateUser(user, body.ClubID)
+		newUser, err := e.CreateUser(user)
 		if err != nil {
 			return err
 		}
@@ -127,12 +132,12 @@ func (e *ApiEnv) UpdateUserHandler() func(c *fiber.Ctx) error {
 			return errors.New("usernames must match")
 		}
 
-		numRecordsUpdated, err := e.UpdateUser(user)
+		updatedUser, err := e.UpdateUser(user)
 		if err != nil {
 			return err
 		}
 
-		return c.SendString(fmt.Sprintf("Updated %d record(s)", numRecordsUpdated))
+		return c.JSON(updatedUser)
 	}
 }
 

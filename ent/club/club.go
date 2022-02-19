@@ -18,7 +18,7 @@ const (
 	// Table holds the table name of the club in the database.
 	Table = "clubs"
 	// MembersTable is the table that holds the members relation/edge. The primary key declared below.
-	MembersTable = "user_memberOf"
+	MembersTable = "user_clubs"
 	// MembersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	MembersInverseTable = "users"

@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/wonesy/bookfahrt/auth"
 	"github.com/wonesy/bookfahrt/ent"
@@ -32,7 +31,7 @@ func TestLogin(t *testing.T) {
 	createdUser, err := apienv.CreateUser(&ent.User{
 		Username: un,
 		Password: hashed,
-	}, uuid.Nil)
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, un, createdUser.Username)
 	assert.True(t, auth.PasswordMatchesHash(pw, createdUser.Password))
@@ -86,7 +85,7 @@ func TestLogout(t *testing.T) {
 	createdUser, err := apienv.CreateUser(&ent.User{
 		Username: un,
 		Password: hashed,
-	}, uuid.Nil)
+	})
 	assert.NoError(t, err)
 	assert.Equal(t, un, createdUser.Username)
 	assert.True(t, auth.PasswordMatchesHash(pw, createdUser.Password))

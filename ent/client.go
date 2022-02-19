@@ -645,15 +645,15 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 	return obj
 }
 
-// QueryMemberOf queries the memberOf edge of a User.
-func (c *UserClient) QueryMemberOf(u *User) *ClubQuery {
+// QueryClubs queries the clubs edge of a User.
+func (c *UserClient) QueryClubs(u *User) *ClubQuery {
 	query := &ClubQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(club.Table, club.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.MemberOfTable, user.MemberOfPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.ClubsTable, user.ClubsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

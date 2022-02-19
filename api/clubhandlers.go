@@ -5,9 +5,20 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"github.com/wonesy/bookfahrt/ent"
 	"github.com/wonesy/bookfahrt/ent/club"
 )
+
+func (e *ApiEnv) InitClubRouter() func(fiber.Router) {
+	return func(router fiber.Router) {
+		router.Post("", e.CreateClubHandler())
+		router.Get("/:id?", e.GetClubHandler())
+		router.Put("/:id", e.UpdateClubHandler())
+		router.Delete("/:id", e.DeleteClubHandler())
+		router.Post("/:id/join", e.JoinClubHandler())
+	}
+}
 
 func (e *ApiEnv) GetAllClubs() ([]*ent.Club, error) {
 	return e.Client.Club.Query().All(context.Background())
@@ -43,10 +54,24 @@ func (e *ApiEnv) CreateClubHandler() func(c *fiber.Ctx) error {
 		if err := c.BodyParser(Club); err != nil {
 			return nil
 		}
+
+		user, err := e.GetSessionUser(c)
+		if err != nil {
+			return errors.Wrap(err, "CreateClubHandler")
+		}
+
 		createdClub, err := e.CreateClub(Club)
 		if err != nil {
 			return err
 		}
+
+		_, err = user.Update().
+			AddClubs(createdClub).
+			Save(context.Background())
+		if err != nil {
+			return errors.Wrap(err, "CreateClubHandler failed to add user to club")
+		}
+
 		return c.JSON(createdClub)
 	}
 }
@@ -62,11 +87,11 @@ func (e *ApiEnv) GetClubHandler() func(c *fiber.Ctx) error {
 			return c.JSON(Clubs)
 		}
 
-		Club, err := e.GetClubByName(name)
+		club, err := e.GetClubByName(name)
 		if err != nil {
 			return err
 		}
-		return c.JSON(Club)
+		return c.JSON(club)
 	}
 }
 
@@ -94,5 +119,24 @@ func (e *ApiEnv) UpdateClubHandler() func(c *fiber.Ctx) error {
 		}
 
 		return c.JSON(updatedClub)
+	}
+}
+
+func (e *ApiEnv) JoinClubHandler() func(c *fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		id := c.Params("id")
+
+		user, err := e.GetSessionUser(c)
+		if err != nil {
+			return errors.Wrap(err, "JoinClubHandler")
+		}
+
+		parsedID, err := uuid.Parse(id)
+		if err != nil {
+			return errors.Wrap(err, "JoinClubHandler parsing uuid failed")
+		}
+
+		_, err = user.Update().AddClubIDs(parsedID).Save(context.Background())
+		return err
 	}
 }

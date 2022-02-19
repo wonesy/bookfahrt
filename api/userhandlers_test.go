@@ -2,15 +2,16 @@ package api_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/assert"
 	"github.com/wonesy/bookfahrt/ent"
+	"github.com/wonesy/bookfahrt/ent/user"
 	"github.com/wonesy/bookfahrt/testhelpers"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -27,7 +28,7 @@ func TestCreateDeleteUser(t *testing.T) {
 		Password:  "test-password",
 	}
 
-	createdUser, err1 := apiEnv.CreateUser(newUser, uuid.Nil)
+	createdUser, err1 := apiEnv.CreateUser(newUser)
 	gotUser, err2 := apiEnv.GetUserByUsername("test-username")
 
 	assert.NoError(t, err1)
@@ -57,7 +58,7 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 		Password:  "test-password",
 	}
 
-	createdUser, err1 := apiEnv.CreateUser(newUser, uuid.Nil)
+	createdUser, err1 := apiEnv.CreateUser(newUser)
 
 	assert.NoError(t, err1)
 	assert.Equal(t, "test-username", createdUser.Username)
@@ -71,19 +72,16 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 	copier.Copy(update, createdUser)
 	update.FirstName = "new first name"
 
-	numUpdated, err3 := apiEnv.UpdateUser(update)
-	gotUser, err2 := apiEnv.GetUserByUsername("test-username")
+	updatedUser, err3 := apiEnv.UpdateUser(update)
 
 	assert.NoError(t, err3)
-	assert.NoError(t, err2)
-	assert.Equal(t, 1, numUpdated)
 
-	assert.EqualValues(t, createdUser.CreatedAt, gotUser.CreatedAt)
-	assert.Equal(t, "test-username", gotUser.Username)
-	assert.Equal(t, "new first name", gotUser.FirstName)
-	assert.Equal(t, "test-lastname", gotUser.LastName)
-	assert.Equal(t, "test-email@email.com", gotUser.Email)
-	assert.Equal(t, "test-password", gotUser.Password)
+	assert.EqualValues(t, createdUser.CreatedAt, updatedUser.CreatedAt)
+	assert.Equal(t, "test-username", updatedUser.Username)
+	assert.Equal(t, "new first name", updatedUser.FirstName)
+	assert.Equal(t, "test-lastname", updatedUser.LastName)
+	assert.Equal(t, "test-email@email.com", updatedUser.Email)
+	assert.Equal(t, "test-password", updatedUser.Password)
 
 	// clean up
 	num, err := apiEnv.DeleteUser("test-username")
@@ -115,7 +113,7 @@ func TestCreateGetUserHandler(t *testing.T) {
 
 	defer func() {
 		req := httptest.NewRequest("DELETE", "/users/username", nil)
-		app.Test(req, 1)
+		app.Test(req, -1)
 	}()
 
 	//
@@ -155,4 +153,35 @@ func TestCreateGetUserHandler(t *testing.T) {
 	assert.Equal(t, 1, len(allUsers))
 	assert.Equal(t, "username", allUsers[0].Username)
 	assert.NotEqual(t, "password", allUsers[0].Password)
+}
+
+func TestUpdateUserWithClub(t *testing.T) {
+	env := testhelpers.NewTestApiEnv(t)
+
+	createdClub, err := env.CreateClub(&ent.Club{
+		Name: "Cameron's Club",
+	})
+	assert.NoError(t, err)
+
+	createdUser, err1 := env.CreateUser(&ent.User{
+		Username: "cameron",
+		Password: "password",
+		Email:    "email@email.com",
+	})
+	assert.NoError(t, err1)
+
+	updatedUser, err2 := createdUser.Update().
+		SetEmail("newemail@email.com").
+		AddClubs(createdClub).
+		Save(context.Background())
+	assert.NoError(t, err2)
+	assert.Equal(t, "newemail@email.com", updatedUser.Email)
+
+	gotUser, err3 := env.Client.User.
+		Query().
+		Where(user.UsernameEQ("cameron")).
+		WithClubs().
+		Only(context.Background())
+	assert.NoError(t, err3)
+	assert.Equal(t, createdClub.ID, gotUser.Edges.Clubs[0].ID)
 }
