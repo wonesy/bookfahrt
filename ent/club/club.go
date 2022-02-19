@@ -13,15 +13,15 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// EdgeUsers holds the string denoting the users edge name in mutations.
-	EdgeUsers = "users"
+	// EdgeMembers holds the string denoting the members edge name in mutations.
+	EdgeMembers = "members"
 	// Table holds the table name of the club in the database.
 	Table = "clubs"
-	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
-	UsersTable = "user_clubs"
-	// UsersInverseTable is the table name for the User entity.
+	// MembersTable is the table that holds the members relation/edge. The primary key declared below.
+	MembersTable = "user_memberOf"
+	// MembersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UsersInverseTable = "users"
+	MembersInverseTable = "users"
 )
 
 // Columns holds all SQL columns for club fields.
@@ -31,9 +31,9 @@ var Columns = []string{
 }
 
 var (
-	// UsersPrimaryKey and UsersColumn2 are the table columns denoting the
-	// primary key for the users relation (M2M).
-	UsersPrimaryKey = []string{"user_id", "club_id"}
+	// MembersPrimaryKey and MembersColumn2 are the table columns denoting the
+	// primary key for the members relation (M2M).
+	MembersPrimaryKey = []string{"user_id", "club_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -343,15 +343,15 @@ func (c *ClubClient) GetX(ctx context.Context, id uuid.UUID) *Club {
 	return obj
 }
 
-// QueryUsers queries the users edge of a Club.
-func (c *ClubClient) QueryUsers(cl *Club) *UserQuery {
+// QueryMembers queries the members edge of a Club.
+func (c *ClubClient) QueryMembers(cl *Club) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := cl.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(club.Table, club.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, club.UsersTable, club.UsersPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, club.MembersTable, club.MembersPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
 		return fromV, nil
@@ -645,15 +645,15 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 	return obj
 }
 
-// QueryClubs queries the clubs edge of a User.
-func (c *UserClient) QueryClubs(u *User) *ClubQuery {
+// QueryMemberOf queries the memberOf edge of a User.
+func (c *UserClient) QueryMemberOf(u *User) *ClubQuery {
 	query := &ClubQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(club.Table, club.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.ClubsTable, user.ClubsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.MemberOfTable, user.MemberOfPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

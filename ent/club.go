@@ -25,20 +25,20 @@ type Club struct {
 
 // ClubEdges holds the relations/edges for other nodes in the graph.
 type ClubEdges struct {
-	// Users holds the value of the users edge.
-	Users []*User `json:"users,omitempty"`
+	// Members holds the value of the members edge.
+	Members []*User `json:"members,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// UsersOrErr returns the Users value or an error if the edge
+// MembersOrErr returns the Members value or an error if the edge
 // was not loaded in eager-loading.
-func (e ClubEdges) UsersOrErr() ([]*User, error) {
+func (e ClubEdges) MembersOrErr() ([]*User, error) {
 	if e.loadedTypes[0] {
-		return e.Users, nil
+		return e.Members, nil
 	}
-	return nil, &NotLoadedError{edge: "users"}
+	return nil, &NotLoadedError{edge: "members"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -82,9 +82,9 @@ func (c *Club) assignValues(columns []string, values []interface{}) error {
 	return nil
 }
 
-// QueryUsers queries the "users" edge of the Club entity.
-func (c *Club) QueryUsers() *UserQuery {
-	return (&ClubClient{config: c.config}).QueryUsers(c)
+// QueryMembers queries the "members" edge of the Club entity.
+func (c *Club) QueryMembers() *UserQuery {
+	return (&ClubClient{config: c.config}).QueryMembers(c)
 }
 
 // Update returns a builder for updating this Club.

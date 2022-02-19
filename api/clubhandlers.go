@@ -2,9 +2,9 @@ package api
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/wonesy/bookfahrt/ent"
 	"github.com/wonesy/bookfahrt/ent/club"
 )
@@ -29,8 +29,12 @@ func (e *ApiEnv) UpdateClub(c *ent.Club) (*ent.Club, error) {
 	return nil, nil
 }
 
-func (e *ApiEnv) DeleteClub(name string) (int, error) {
-	return 0, nil
+func (e *ApiEnv) DeleteClub(id string) error {
+	val, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+	return e.Client.Club.DeleteOneID(val).Exec(context.TODO())
 }
 
 func (e *ApiEnv) CreateClubHandler() func(c *fiber.Ctx) error {
@@ -68,12 +72,12 @@ func (e *ApiEnv) GetClubHandler() func(c *fiber.Ctx) error {
 
 func (e *ApiEnv) DeleteClubHandler() func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
-		name := c.Params("name")
-		numDeleted, err := e.DeleteClub(name)
+		id := c.Params("id")
+		err := e.DeleteClub(id)
 		if err != nil {
 			return err
 		}
-		return c.SendString(fmt.Sprintf("Deleted %d club(s)", numDeleted))
+		return c.SendString("Deleted club")
 	}
 }
 

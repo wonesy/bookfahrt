@@ -44,19 +44,19 @@ func (cc *ClubCreate) SetNillableID(u *uuid.UUID) *ClubCreate {
 	return cc
 }
 
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cc *ClubCreate) AddUserIDs(ids ...int) *ClubCreate {
-	cc.mutation.AddUserIDs(ids...)
+// AddMemberIDs adds the "members" edge to the User entity by IDs.
+func (cc *ClubCreate) AddMemberIDs(ids ...int) *ClubCreate {
+	cc.mutation.AddMemberIDs(ids...)
 	return cc
 }
 
-// AddUsers adds the "users" edges to the User entity.
-func (cc *ClubCreate) AddUsers(u ...*User) *ClubCreate {
+// AddMembers adds the "members" edges to the User entity.
+func (cc *ClubCreate) AddMembers(u ...*User) *ClubCreate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return cc.AddUserIDs(ids...)
+	return cc.AddMemberIDs(ids...)
 }
 
 // Mutation returns the ClubMutation object of the builder.
@@ -191,12 +191,12 @@ func (cc *ClubCreate) createSpec() (*Club, *sqlgraph.CreateSpec) {
 		})
 		_node.Name = value
 	}
-	if nodes := cc.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := cc.mutation.MembersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   club.UsersTable,
-			Columns: club.UsersPrimaryKey,
+			Table:   club.MembersTable,
+			Columns: club.MembersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

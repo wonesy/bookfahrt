@@ -28,7 +28,7 @@ type UserQuery struct {
 	fields     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withClubs *ClubQuery
+	withMemberOf *ClubQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -65,8 +65,8 @@ func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	return uq
 }
 
-// QueryClubs chains the current query on the "clubs" edge.
-func (uq *UserQuery) QueryClubs() *ClubQuery {
+// QueryMemberOf chains the current query on the "memberOf" edge.
+func (uq *UserQuery) QueryMemberOf() *ClubQuery {
 	query := &ClubQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
@@ -79,7 +79,7 @@ func (uq *UserQuery) QueryClubs() *ClubQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(club.Table, club.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.ClubsTable, user.ClubsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.MemberOfTable, user.MemberOfPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -263,26 +263,26 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:     uq.config,
-		limit:      uq.limit,
-		offset:     uq.offset,
-		order:      append([]OrderFunc{}, uq.order...),
-		predicates: append([]predicate.User{}, uq.predicates...),
-		withClubs:  uq.withClubs.Clone(),
+		config:       uq.config,
+		limit:        uq.limit,
+		offset:       uq.offset,
+		order:        append([]OrderFunc{}, uq.order...),
+		predicates:   append([]predicate.User{}, uq.predicates...),
+		withMemberOf: uq.withMemberOf.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
 	}
 }
 
-// WithClubs tells the query-builder to eager-load the nodes that are connected to
-// the "clubs" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithClubs(opts ...func(*ClubQuery)) *UserQuery {
+// WithMemberOf tells the query-builder to eager-load the nodes that are connected to
+// the "memberOf" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithMemberOf(opts ...func(*ClubQuery)) *UserQuery {
 	query := &ClubQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withClubs = query
+	uq.withMemberOf = query
 	return uq
 }
 
@@ -352,7 +352,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
 		loadedTypes = [1]bool{
-			uq.withClubs != nil,
+			uq.withMemberOf != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -375,13 +375,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		return nodes, nil
 	}
 
-	if query := uq.withClubs; query != nil {
+	if query := uq.withMemberOf; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
-			node.Edges.Clubs = []*Club{}
+			node.Edges.MemberOf = []*Club{}
 		}
 		var (
 			edgeids []uuid.UUID
@@ -390,11 +390,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
 				Inverse: false,
-				Table:   user.ClubsTable,
-				Columns: user.ClubsPrimaryKey,
+				Table:   user.MemberOfTable,
+				Columns: user.MemberOfPrimaryKey,
 			},
 			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(user.ClubsPrimaryKey[0], fks...))
+				s.Where(sql.InValues(user.MemberOfPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{new(sql.NullInt64), new(uuid.UUID)}
@@ -422,7 +422,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "clubs": %w`, err)
+			return nil, fmt.Errorf(`query edges "memberOf": %w`, err)
 		}
 		query.Where(club.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
@@ -432,10 +432,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for _, n := range neighbors {
 			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "clubs" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "memberOf" node returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Clubs = append(nodes[i].Edges.Clubs, n)
+				nodes[i].Edges.MemberOf = append(nodes[i].Edges.MemberOf, n)
 			}
 		}
 	}

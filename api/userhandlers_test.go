@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/jinzhu/copier"
 	"github.com/stretchr/testify/assert"
 	"github.com/wonesy/bookfahrt/ent"
@@ -26,7 +27,7 @@ func TestCreateDeleteUser(t *testing.T) {
 		Password:  "test-password",
 	}
 
-	createdUser, err1 := apiEnv.CreateUser(newUser)
+	createdUser, err1 := apiEnv.CreateUser(newUser, uuid.Nil)
 	gotUser, err2 := apiEnv.GetUserByUsername("test-username")
 
 	assert.NoError(t, err1)
@@ -56,7 +57,7 @@ func TestCreateUpdateDeleteUser(t *testing.T) {
 		Password:  "test-password",
 	}
 
-	createdUser, err1 := apiEnv.CreateUser(newUser)
+	createdUser, err1 := apiEnv.CreateUser(newUser, uuid.Nil)
 
 	assert.NoError(t, err1)
 	assert.Equal(t, "test-username", createdUser.Username)

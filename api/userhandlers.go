@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/wonesy/bookfahrt/auth"
 	"github.com/wonesy/bookfahrt/ent"
 	"github.com/wonesy/bookfahrt/ent/user"
@@ -31,7 +32,7 @@ func (e *ApiEnv) GetUserByUsername(username string) (*ent.User, error) {
 		Only(context.Background())
 }
 
-func (e *ApiEnv) CreateUser(user *ent.User) (*ent.User, error) {
+func (e *ApiEnv) CreateUser(user *ent.User, clubID uuid.UUID) (*ent.User, error) {
 	return e.Client.User.Create().
 		SetUsername(user.Username).
 		SetFirstName(user.FirstName).
@@ -77,19 +78,22 @@ func (e *ApiEnv) GetUserHandler() func(c *fiber.Ctx) error {
 }
 
 func (e *ApiEnv) CreateUserHandler() func(c *fiber.Ctx) error {
-	type bodyPassword struct {
-		Password string `json:"password"`
+	type partialBody struct {
+		ClubID   uuid.UUID `json:"club_id"`
+		Password string    `json:"password"`
 	}
 
 	return func(c *fiber.Ctx) error {
 		user := new(ent.User)
-		pw := new(bodyPassword)
+		body := new(partialBody)
 
-		if err := c.BodyParser(pw); err != nil {
+		if err := c.BodyParser(body); err != nil {
 			return err
 		}
 
-		hashedPass, err := auth.HashPassword(pw.Password)
+		fmt.Println(body.Password)
+
+		hashedPass, err := auth.HashPassword(body.Password)
 		if err != nil {
 			return err
 		}
@@ -102,7 +106,7 @@ func (e *ApiEnv) CreateUserHandler() func(c *fiber.Ctx) error {
 
 		user.Password = hashedPass
 
-		newUser, err := e.CreateUser(user)
+		newUser, err := e.CreateUser(user, body.ClubID)
 		if err != nil {
 			return err
 		}

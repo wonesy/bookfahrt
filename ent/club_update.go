@@ -34,19 +34,19 @@ func (cu *ClubUpdate) SetName(s string) *ClubUpdate {
 	return cu
 }
 
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cu *ClubUpdate) AddUserIDs(ids ...int) *ClubUpdate {
-	cu.mutation.AddUserIDs(ids...)
+// AddMemberIDs adds the "members" edge to the User entity by IDs.
+func (cu *ClubUpdate) AddMemberIDs(ids ...int) *ClubUpdate {
+	cu.mutation.AddMemberIDs(ids...)
 	return cu
 }
 
-// AddUsers adds the "users" edges to the User entity.
-func (cu *ClubUpdate) AddUsers(u ...*User) *ClubUpdate {
+// AddMembers adds the "members" edges to the User entity.
+func (cu *ClubUpdate) AddMembers(u ...*User) *ClubUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return cu.AddUserIDs(ids...)
+	return cu.AddMemberIDs(ids...)
 }
 
 // Mutation returns the ClubMutation object of the builder.
@@ -54,25 +54,25 @@ func (cu *ClubUpdate) Mutation() *ClubMutation {
 	return cu.mutation
 }
 
-// ClearUsers clears all "users" edges to the User entity.
-func (cu *ClubUpdate) ClearUsers() *ClubUpdate {
-	cu.mutation.ClearUsers()
+// ClearMembers clears all "members" edges to the User entity.
+func (cu *ClubUpdate) ClearMembers() *ClubUpdate {
+	cu.mutation.ClearMembers()
 	return cu
 }
 
-// RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (cu *ClubUpdate) RemoveUserIDs(ids ...int) *ClubUpdate {
-	cu.mutation.RemoveUserIDs(ids...)
+// RemoveMemberIDs removes the "members" edge to User entities by IDs.
+func (cu *ClubUpdate) RemoveMemberIDs(ids ...int) *ClubUpdate {
+	cu.mutation.RemoveMemberIDs(ids...)
 	return cu
 }
 
-// RemoveUsers removes "users" edges to User entities.
-func (cu *ClubUpdate) RemoveUsers(u ...*User) *ClubUpdate {
+// RemoveMembers removes "members" edges to User entities.
+func (cu *ClubUpdate) RemoveMembers(u ...*User) *ClubUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return cu.RemoveUserIDs(ids...)
+	return cu.RemoveMemberIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -170,12 +170,12 @@ func (cu *ClubUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: club.FieldName,
 		})
 	}
-	if cu.mutation.UsersCleared() {
+	if cu.mutation.MembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   club.UsersTable,
-			Columns: club.UsersPrimaryKey,
+			Table:   club.MembersTable,
+			Columns: club.MembersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -186,12 +186,12 @@ func (cu *ClubUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !cu.mutation.UsersCleared() {
+	if nodes := cu.mutation.RemovedMembersIDs(); len(nodes) > 0 && !cu.mutation.MembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   club.UsersTable,
-			Columns: club.UsersPrimaryKey,
+			Table:   club.MembersTable,
+			Columns: club.MembersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -205,12 +205,12 @@ func (cu *ClubUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.MembersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   club.UsersTable,
-			Columns: club.UsersPrimaryKey,
+			Table:   club.MembersTable,
+			Columns: club.MembersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -249,19 +249,19 @@ func (cuo *ClubUpdateOne) SetName(s string) *ClubUpdateOne {
 	return cuo
 }
 
-// AddUserIDs adds the "users" edge to the User entity by IDs.
-func (cuo *ClubUpdateOne) AddUserIDs(ids ...int) *ClubUpdateOne {
-	cuo.mutation.AddUserIDs(ids...)
+// AddMemberIDs adds the "members" edge to the User entity by IDs.
+func (cuo *ClubUpdateOne) AddMemberIDs(ids ...int) *ClubUpdateOne {
+	cuo.mutation.AddMemberIDs(ids...)
 	return cuo
 }
 
-// AddUsers adds the "users" edges to the User entity.
-func (cuo *ClubUpdateOne) AddUsers(u ...*User) *ClubUpdateOne {
+// AddMembers adds the "members" edges to the User entity.
+func (cuo *ClubUpdateOne) AddMembers(u ...*User) *ClubUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return cuo.AddUserIDs(ids...)
+	return cuo.AddMemberIDs(ids...)
 }
 
 // Mutation returns the ClubMutation object of the builder.
@@ -269,25 +269,25 @@ func (cuo *ClubUpdateOne) Mutation() *ClubMutation {
 	return cuo.mutation
 }
 
-// ClearUsers clears all "users" edges to the User entity.
-func (cuo *ClubUpdateOne) ClearUsers() *ClubUpdateOne {
-	cuo.mutation.ClearUsers()
+// ClearMembers clears all "members" edges to the User entity.
+func (cuo *ClubUpdateOne) ClearMembers() *ClubUpdateOne {
+	cuo.mutation.ClearMembers()
 	return cuo
 }
 
-// RemoveUserIDs removes the "users" edge to User entities by IDs.
-func (cuo *ClubUpdateOne) RemoveUserIDs(ids ...int) *ClubUpdateOne {
-	cuo.mutation.RemoveUserIDs(ids...)
+// RemoveMemberIDs removes the "members" edge to User entities by IDs.
+func (cuo *ClubUpdateOne) RemoveMemberIDs(ids ...int) *ClubUpdateOne {
+	cuo.mutation.RemoveMemberIDs(ids...)
 	return cuo
 }
 
-// RemoveUsers removes "users" edges to User entities.
-func (cuo *ClubUpdateOne) RemoveUsers(u ...*User) *ClubUpdateOne {
+// RemoveMembers removes "members" edges to User entities.
+func (cuo *ClubUpdateOne) RemoveMembers(u ...*User) *ClubUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
 	}
-	return cuo.RemoveUserIDs(ids...)
+	return cuo.RemoveMemberIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -409,12 +409,12 @@ func (cuo *ClubUpdateOne) sqlSave(ctx context.Context) (_node *Club, err error) 
 			Column: club.FieldName,
 		})
 	}
-	if cuo.mutation.UsersCleared() {
+	if cuo.mutation.MembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   club.UsersTable,
-			Columns: club.UsersPrimaryKey,
+			Table:   club.MembersTable,
+			Columns: club.MembersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -425,12 +425,12 @@ func (cuo *ClubUpdateOne) sqlSave(ctx context.Context) (_node *Club, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !cuo.mutation.UsersCleared() {
+	if nodes := cuo.mutation.RemovedMembersIDs(); len(nodes) > 0 && !cuo.mutation.MembersCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   club.UsersTable,
-			Columns: club.UsersPrimaryKey,
+			Table:   club.MembersTable,
+			Columns: club.MembersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -444,12 +444,12 @@ func (cuo *ClubUpdateOne) sqlSave(ctx context.Context) (_node *Club, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.UsersIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.MembersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   club.UsersTable,
-			Columns: club.UsersPrimaryKey,
+			Table:   club.MembersTable,
+			Columns: club.MembersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

@@ -109,26 +109,26 @@ var (
 			},
 		},
 	}
-	// UserClubsColumns holds the columns for the "user_clubs" table.
-	UserClubsColumns = []*schema.Column{
+	// UserMemberOfColumns holds the columns for the "user_memberOf" table.
+	UserMemberOfColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeInt},
 		{Name: "club_id", Type: field.TypeUUID},
 	}
-	// UserClubsTable holds the schema information for the "user_clubs" table.
-	UserClubsTable = &schema.Table{
-		Name:       "user_clubs",
-		Columns:    UserClubsColumns,
-		PrimaryKey: []*schema.Column{UserClubsColumns[0], UserClubsColumns[1]},
+	// UserMemberOfTable holds the schema information for the "user_memberOf" table.
+	UserMemberOfTable = &schema.Table{
+		Name:       "user_memberOf",
+		Columns:    UserMemberOfColumns,
+		PrimaryKey: []*schema.Column{UserMemberOfColumns[0], UserMemberOfColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "user_clubs_user_id",
-				Columns:    []*schema.Column{UserClubsColumns[0]},
+				Symbol:     "user_memberOf_user_id",
+				Columns:    []*schema.Column{UserMemberOfColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "user_clubs_club_id",
-				Columns:    []*schema.Column{UserClubsColumns[1]},
+				Symbol:     "user_memberOf_club_id",
+				Columns:    []*schema.Column{UserMemberOfColumns[1]},
 				RefColumns: []*schema.Column{ClubsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -142,13 +142,13 @@ var (
 		GenresTable,
 		UsersTable,
 		BookGenresTable,
-		UserClubsTable,
+		UserMemberOfTable,
 	}
 )
 
 func init() {
 	BookGenresTable.ForeignKeys[0].RefTable = BooksTable
 	BookGenresTable.ForeignKeys[1].RefTable = GenresTable
-	UserClubsTable.ForeignKeys[0].RefTable = UsersTable
-	UserClubsTable.ForeignKeys[1].RefTable = ClubsTable
+	UserMemberOfTable.ForeignKeys[0].RefTable = UsersTable
+	UserMemberOfTable.ForeignKeys[1].RefTable = ClubsTable
 }
