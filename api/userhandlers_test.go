@@ -13,8 +13,6 @@ import (
 	"github.com/wonesy/bookfahrt/ent"
 	"github.com/wonesy/bookfahrt/ent/user"
 	"github.com/wonesy/bookfahrt/testhelpers"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestCreateDeleteUser(t *testing.T) {

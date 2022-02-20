@@ -10,7 +10,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/wonesy/bookfahrt/ent/club"
+	"github.com/wonesy/bookfahrt/ent/invitation"
 	"github.com/wonesy/bookfahrt/ent/predicate"
 	"github.com/wonesy/bookfahrt/ent/user"
 )
@@ -49,6 +51,21 @@ func (cu *ClubUpdate) AddMembers(u ...*User) *ClubUpdate {
 	return cu.AddMemberIDs(ids...)
 }
 
+// AddInvitationIDs adds the "invitations" edge to the Invitation entity by IDs.
+func (cu *ClubUpdate) AddInvitationIDs(ids ...uuid.UUID) *ClubUpdate {
+	cu.mutation.AddInvitationIDs(ids...)
+	return cu
+}
+
+// AddInvitations adds the "invitations" edges to the Invitation entity.
+func (cu *ClubUpdate) AddInvitations(i ...*Invitation) *ClubUpdate {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return cu.AddInvitationIDs(ids...)
+}
+
 // Mutation returns the ClubMutation object of the builder.
 func (cu *ClubUpdate) Mutation() *ClubMutation {
 	return cu.mutation
@@ -73,6 +90,27 @@ func (cu *ClubUpdate) RemoveMembers(u ...*User) *ClubUpdate {
 		ids[i] = u[i].ID
 	}
 	return cu.RemoveMemberIDs(ids...)
+}
+
+// ClearInvitations clears all "invitations" edges to the Invitation entity.
+func (cu *ClubUpdate) ClearInvitations() *ClubUpdate {
+	cu.mutation.ClearInvitations()
+	return cu
+}
+
+// RemoveInvitationIDs removes the "invitations" edge to Invitation entities by IDs.
+func (cu *ClubUpdate) RemoveInvitationIDs(ids ...uuid.UUID) *ClubUpdate {
+	cu.mutation.RemoveInvitationIDs(ids...)
+	return cu
+}
+
+// RemoveInvitations removes "invitations" edges to Invitation entities.
+func (cu *ClubUpdate) RemoveInvitations(i ...*Invitation) *ClubUpdate {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return cu.RemoveInvitationIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -224,6 +262,60 @@ func (cu *ClubUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cu.mutation.InvitationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   club.InvitationsTable,
+			Columns: []string{club.InvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: invitation.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedInvitationsIDs(); len(nodes) > 0 && !cu.mutation.InvitationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   club.InvitationsTable,
+			Columns: []string{club.InvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: invitation.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.InvitationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   club.InvitationsTable,
+			Columns: []string{club.InvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: invitation.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{club.Label}
@@ -264,6 +356,21 @@ func (cuo *ClubUpdateOne) AddMembers(u ...*User) *ClubUpdateOne {
 	return cuo.AddMemberIDs(ids...)
 }
 
+// AddInvitationIDs adds the "invitations" edge to the Invitation entity by IDs.
+func (cuo *ClubUpdateOne) AddInvitationIDs(ids ...uuid.UUID) *ClubUpdateOne {
+	cuo.mutation.AddInvitationIDs(ids...)
+	return cuo
+}
+
+// AddInvitations adds the "invitations" edges to the Invitation entity.
+func (cuo *ClubUpdateOne) AddInvitations(i ...*Invitation) *ClubUpdateOne {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return cuo.AddInvitationIDs(ids...)
+}
+
 // Mutation returns the ClubMutation object of the builder.
 func (cuo *ClubUpdateOne) Mutation() *ClubMutation {
 	return cuo.mutation
@@ -288,6 +395,27 @@ func (cuo *ClubUpdateOne) RemoveMembers(u ...*User) *ClubUpdateOne {
 		ids[i] = u[i].ID
 	}
 	return cuo.RemoveMemberIDs(ids...)
+}
+
+// ClearInvitations clears all "invitations" edges to the Invitation entity.
+func (cuo *ClubUpdateOne) ClearInvitations() *ClubUpdateOne {
+	cuo.mutation.ClearInvitations()
+	return cuo
+}
+
+// RemoveInvitationIDs removes the "invitations" edge to Invitation entities by IDs.
+func (cuo *ClubUpdateOne) RemoveInvitationIDs(ids ...uuid.UUID) *ClubUpdateOne {
+	cuo.mutation.RemoveInvitationIDs(ids...)
+	return cuo
+}
+
+// RemoveInvitations removes "invitations" edges to Invitation entities.
+func (cuo *ClubUpdateOne) RemoveInvitations(i ...*Invitation) *ClubUpdateOne {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return cuo.RemoveInvitationIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -455,6 +583,60 @@ func (cuo *ClubUpdateOne) sqlSave(ctx context.Context) (_node *Club, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.InvitationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   club.InvitationsTable,
+			Columns: []string{club.InvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: invitation.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedInvitationsIDs(); len(nodes) > 0 && !cuo.mutation.InvitationsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   club.InvitationsTable,
+			Columns: []string{club.InvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: invitation.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.InvitationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   club.InvitationsTable,
+			Columns: []string{club.InvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: invitation.FieldID,
 				},
 			},
 		}

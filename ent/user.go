@@ -39,9 +39,11 @@ type User struct {
 type UserEdges struct {
 	// Clubs holds the value of the clubs edge.
 	Clubs []*Club `json:"clubs,omitempty"`
+	// Invitations holds the value of the invitations edge.
+	Invitations []*Invitation `json:"invitations,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // ClubsOrErr returns the Clubs value or an error if the edge
@@ -51,6 +53,15 @@ func (e UserEdges) ClubsOrErr() ([]*Club, error) {
 		return e.Clubs, nil
 	}
 	return nil, &NotLoadedError{edge: "clubs"}
+}
+
+// InvitationsOrErr returns the Invitations value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) InvitationsOrErr() ([]*Invitation, error) {
+	if e.loadedTypes[1] {
+		return e.Invitations, nil
+	}
+	return nil, &NotLoadedError{edge: "invitations"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -135,6 +146,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 // QueryClubs queries the "clubs" edge of the User entity.
 func (u *User) QueryClubs() *ClubQuery {
 	return (&UserClient{config: u.config}).QueryClubs(u)
+}
+
+// QueryInvitations queries the "invitations" edge of the User entity.
+func (u *User) QueryInvitations() *InvitationQuery {
+	return (&UserClient{config: u.config}).QueryInvitations(u)
 }
 
 // Update returns a builder for updating this User.

@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/wonesy/bookfahrt/ent/book"
 	"github.com/wonesy/bookfahrt/ent/club"
+	"github.com/wonesy/bookfahrt/ent/invitation"
 	"github.com/wonesy/bookfahrt/ent/schema"
 	"github.com/wonesy/bookfahrt/ent/user"
 )
@@ -36,6 +37,12 @@ func init() {
 	clubDescID := clubFields[0].Descriptor()
 	// club.DefaultID holds the default value on creation for the id field.
 	club.DefaultID = clubDescID.Default.(func() uuid.UUID)
+	invitationFields := schema.Invitation{}.Fields()
+	_ = invitationFields
+	// invitationDescID is the schema descriptor for id field.
+	invitationDescID := invitationFields[0].Descriptor()
+	// invitation.DefaultID holds the default value on creation for the id field.
+	invitation.DefaultID = invitationDescID.Default.(func() uuid.UUID)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescPassword is the schema descriptor for password field.

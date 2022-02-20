@@ -12,6 +12,7 @@ import (
 	"github.com/wonesy/bookfahrt/ent/club"
 	"github.com/wonesy/bookfahrt/ent/completion"
 	"github.com/wonesy/bookfahrt/ent/genre"
+	"github.com/wonesy/bookfahrt/ent/invitation"
 	"github.com/wonesy/bookfahrt/ent/user"
 )
 
@@ -37,6 +38,7 @@ func columnChecker(table string) func(string) error {
 		club.Table:       club.ValidColumn,
 		completion.Table: completion.ValidColumn,
 		genre.Table:      genre.ValidColumn,
+		invitation.Table: invitation.ValidColumn,
 		user.Table:       user.ValidColumn,
 	}
 	check, ok := checks[table]

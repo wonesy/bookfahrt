@@ -12,6 +12,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/wonesy/bookfahrt/api"
 	"github.com/wonesy/bookfahrt/ent"
+	"github.com/wonesy/bookfahrt/logging"
 )
 
 func initDb() *ent.Client {
@@ -40,6 +41,7 @@ func main() {
 	client := initDb()
 	defer client.Close()
 	apiEnv := api.NewApiEnv(client, store)
+	logging.InitLoggers()
 
 	// middleware
 	app.Use(recover.New())
@@ -48,6 +50,7 @@ func main() {
 	app.Route("/auth", apiEnv.InitAuthRouter())
 	app.Route("/users", apiEnv.InitUserRouter())
 	app.Route("/books", apiEnv.InitBookRouter())
+	app.Route("/clubs", apiEnv.InitClubRouter())
 
 	log.Fatal(app.Listen(":4000"))
 }

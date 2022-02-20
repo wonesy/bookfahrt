@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/wonesy/bookfahrt/ent/club"
+	"github.com/wonesy/bookfahrt/ent/invitation"
 	"github.com/wonesy/bookfahrt/ent/user"
 )
 
@@ -57,6 +58,21 @@ func (cc *ClubCreate) AddMembers(u ...*User) *ClubCreate {
 		ids[i] = u[i].ID
 	}
 	return cc.AddMemberIDs(ids...)
+}
+
+// AddInvitationIDs adds the "invitations" edge to the Invitation entity by IDs.
+func (cc *ClubCreate) AddInvitationIDs(ids ...uuid.UUID) *ClubCreate {
+	cc.mutation.AddInvitationIDs(ids...)
+	return cc
+}
+
+// AddInvitations adds the "invitations" edges to the Invitation entity.
+func (cc *ClubCreate) AddInvitations(i ...*Invitation) *ClubCreate {
+	ids := make([]uuid.UUID, len(i))
+	for j := range i {
+		ids[j] = i[j].ID
+	}
+	return cc.AddInvitationIDs(ids...)
 }
 
 // Mutation returns the ClubMutation object of the builder.
@@ -202,6 +218,25 @@ func (cc *ClubCreate) createSpec() (*Club, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.InvitationsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: true,
+			Table:   club.InvitationsTable,
+			Columns: []string{club.InvitationsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: invitation.FieldID,
 				},
 			},
 		}

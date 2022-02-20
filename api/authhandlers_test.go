@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -127,5 +128,52 @@ func TestLogout(t *testing.T) {
 		}
 	}
 	assert.Empty(t, removedSessionID)
+}
 
+func TestRegistrationProcess(t *testing.T) {
+	app, env := testhelpers.NewTestTools(t)
+	defer testhelpers.WipeDB(env)
+
+	// create club
+	club, _ := env.CreateClub(&ent.Club{Name: "test club"})
+
+	// create user
+	createdUser, _ := env.CreateUser(&ent.User{
+		Username: "u",
+		Password: "p",
+	}, club.ID)
+
+	// create invitation
+	inv, _ := env.CreateInvitation(createdUser, club.ID)
+
+	// attempt to register
+	registration := &auth.UserRegistration{
+		Username:     "new",
+		Password:     "newpass",
+		FirstName:    "f",
+		LastName:     "l",
+		Email:        "a@a.a",
+		InvitationID: inv.ID.String(),
+	}
+	var buf bytes.Buffer
+	json.NewEncoder(&buf).Encode(registration)
+	req := httptest.NewRequest("POST", "/auth/register", &buf)
+	req.Header.Add("Content-Type", "application/json")
+	resp, err := app.Test(req, -1)
+
+	assert.NoError(t, err)
+	assert.Equal(t, 200, resp.StatusCode)
+
+	// validate edges
+	var newUser ent.User
+	b, _ := io.ReadAll(resp.Body)
+	err = json.Unmarshal(b, &newUser)
+	assert.NoError(t, err)
+	assert.Equal(t, registration.Username, newUser.Username)
+	assert.Equal(t, 1, len(newUser.Edges.Clubs))
+	assert.Equal(t, club.Name, newUser.Edges.Clubs[0].Name)
+
+	// validate invitation was deleted
+	invs := env.Client.Invitation.Query().AllX(context.Background())
+	assert.Equal(t, 0, len(invs))
 }

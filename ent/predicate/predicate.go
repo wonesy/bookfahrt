@@ -18,5 +18,8 @@ type Completion func(*sql.Selector)
 // Genre is the predicate function for genre builders.
 type Genre func(*sql.Selector)
 
+// Invitation is the predicate function for invitation builders.
+type Invitation func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

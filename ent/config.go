@@ -28,6 +28,7 @@ type hooks struct {
 	Club       []ent.Hook
 	Completion []ent.Hook
 	Genre      []ent.Hook
+	Invitation []ent.Hook
 	User       []ent.Hook
 }
 

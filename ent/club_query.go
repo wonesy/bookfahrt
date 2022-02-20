@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/wonesy/bookfahrt/ent/club"
+	"github.com/wonesy/bookfahrt/ent/invitation"
 	"github.com/wonesy/bookfahrt/ent/predicate"
 	"github.com/wonesy/bookfahrt/ent/user"
 )
@@ -28,7 +29,8 @@ type ClubQuery struct {
 	fields     []string
 	predicates []predicate.Club
 	// eager-loading edges.
-	withMembers *UserQuery
+	withMembers     *UserQuery
+	withInvitations *InvitationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,6 +82,28 @@ func (cq *ClubQuery) QueryMembers() *UserQuery {
 			sqlgraph.From(club.Table, club.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, club.MembersTable, club.MembersPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryInvitations chains the current query on the "invitations" edge.
+func (cq *ClubQuery) QueryInvitations() *InvitationQuery {
+	query := &InvitationQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(club.Table, club.FieldID, selector),
+			sqlgraph.To(invitation.Table, invitation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, club.InvitationsTable, club.InvitationsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -263,12 +287,13 @@ func (cq *ClubQuery) Clone() *ClubQuery {
 		return nil
 	}
 	return &ClubQuery{
-		config:      cq.config,
-		limit:       cq.limit,
-		offset:      cq.offset,
-		order:       append([]OrderFunc{}, cq.order...),
-		predicates:  append([]predicate.Club{}, cq.predicates...),
-		withMembers: cq.withMembers.Clone(),
+		config:          cq.config,
+		limit:           cq.limit,
+		offset:          cq.offset,
+		order:           append([]OrderFunc{}, cq.order...),
+		predicates:      append([]predicate.Club{}, cq.predicates...),
+		withMembers:     cq.withMembers.Clone(),
+		withInvitations: cq.withInvitations.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -283,6 +308,17 @@ func (cq *ClubQuery) WithMembers(opts ...func(*UserQuery)) *ClubQuery {
 		opt(query)
 	}
 	cq.withMembers = query
+	return cq
+}
+
+// WithInvitations tells the query-builder to eager-load the nodes that are connected to
+// the "invitations" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ClubQuery) WithInvitations(opts ...func(*InvitationQuery)) *ClubQuery {
+	query := &InvitationQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withInvitations = query
 	return cq
 }
 
@@ -351,8 +387,9 @@ func (cq *ClubQuery) sqlAll(ctx context.Context) ([]*Club, error) {
 	var (
 		nodes       = []*Club{}
 		_spec       = cq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			cq.withMembers != nil,
+			cq.withInvitations != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -437,6 +474,35 @@ func (cq *ClubQuery) sqlAll(ctx context.Context) ([]*Club, error) {
 			for i := range nodes {
 				nodes[i].Edges.Members = append(nodes[i].Edges.Members, n)
 			}
+		}
+	}
+
+	if query := cq.withInvitations; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Club)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Invitations = []*Invitation{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Invitation(func(s *sql.Selector) {
+			s.Where(sql.InValues(club.InvitationsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.invitation_club
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "invitation_club" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "invitation_club" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Invitations = append(node.Edges.Invitations, n)
 		}
 	}
 

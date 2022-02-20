@@ -20,6 +20,8 @@ type Tx struct {
 	Completion *CompletionClient
 	// Genre is the client for interacting with the Genre builders.
 	Genre *GenreClient
+	// Invitation is the client for interacting with the Invitation builders.
+	Invitation *InvitationClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -161,6 +163,7 @@ func (tx *Tx) init() {
 	tx.Club = NewClubClient(tx.config)
 	tx.Completion = NewCompletionClient(tx.config)
 	tx.Genre = NewGenreClient(tx.config)
+	tx.Invitation = NewInvitationClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

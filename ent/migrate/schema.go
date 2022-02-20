@@ -60,6 +60,32 @@ var (
 		Columns:    GenresColumns,
 		PrimaryKey: []*schema.Column{GenresColumns[0]},
 	}
+	// InvitationsColumns holds the columns for the "invitations" table.
+	InvitationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "invitation_sponsor", Type: field.TypeInt, Nullable: true},
+		{Name: "invitation_club", Type: field.TypeUUID, Nullable: true},
+	}
+	// InvitationsTable holds the schema information for the "invitations" table.
+	InvitationsTable = &schema.Table{
+		Name:       "invitations",
+		Columns:    InvitationsColumns,
+		PrimaryKey: []*schema.Column{InvitationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "invitations_users_sponsor",
+				Columns:    []*schema.Column{InvitationsColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "invitations_clubs_club",
+				Columns:    []*schema.Column{InvitationsColumns[2]},
+				RefColumns: []*schema.Column{ClubsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -140,6 +166,7 @@ var (
 		ClubsTable,
 		CompletionsTable,
 		GenresTable,
+		InvitationsTable,
 		UsersTable,
 		BookGenresTable,
 		UserClubsTable,
@@ -147,6 +174,8 @@ var (
 )
 
 func init() {
+	InvitationsTable.ForeignKeys[0].RefTable = UsersTable
+	InvitationsTable.ForeignKeys[1].RefTable = ClubsTable
 	BookGenresTable.ForeignKeys[0].RefTable = BooksTable
 	BookGenresTable.ForeignKeys[1].RefTable = GenresTable
 	UserClubsTable.ForeignKeys[0].RefTable = UsersTable

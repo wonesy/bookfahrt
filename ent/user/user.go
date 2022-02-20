@@ -27,6 +27,8 @@ const (
 	FieldLastLoginAt = "last_login_at"
 	// EdgeClubs holds the string denoting the clubs edge name in mutations.
 	EdgeClubs = "clubs"
+	// EdgeInvitations holds the string denoting the invitations edge name in mutations.
+	EdgeInvitations = "invitations"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// ClubsTable is the table that holds the clubs relation/edge. The primary key declared below.
@@ -34,6 +36,13 @@ const (
 	// ClubsInverseTable is the table name for the Club entity.
 	// It exists in this package in order to avoid circular dependency with the "club" package.
 	ClubsInverseTable = "clubs"
+	// InvitationsTable is the table that holds the invitations relation/edge.
+	InvitationsTable = "invitations"
+	// InvitationsInverseTable is the table name for the Invitation entity.
+	// It exists in this package in order to avoid circular dependency with the "invitation" package.
+	InvitationsInverseTable = "invitations"
+	// InvitationsColumn is the table column denoting the invitations relation/edge.
+	InvitationsColumn = "invitation_sponsor"
 )
 
 // Columns holds all SQL columns for user fields.

@@ -14,6 +14,7 @@ import (
 	"github.com/wonesy/bookfahrt/ent/club"
 	"github.com/wonesy/bookfahrt/ent/completion"
 	"github.com/wonesy/bookfahrt/ent/genre"
+	"github.com/wonesy/bookfahrt/ent/invitation"
 	"github.com/wonesy/bookfahrt/ent/user"
 
 	"entgo.io/ent/dialect"
@@ -34,6 +35,8 @@ type Client struct {
 	Completion *CompletionClient
 	// Genre is the client for interacting with the Genre builders.
 	Genre *GenreClient
+	// Invitation is the client for interacting with the Invitation builders.
+	Invitation *InvitationClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -53,6 +56,7 @@ func (c *Client) init() {
 	c.Club = NewClubClient(c.config)
 	c.Completion = NewCompletionClient(c.config)
 	c.Genre = NewGenreClient(c.config)
+	c.Invitation = NewInvitationClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -91,6 +95,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Club:       NewClubClient(cfg),
 		Completion: NewCompletionClient(cfg),
 		Genre:      NewGenreClient(cfg),
+		Invitation: NewInvitationClient(cfg),
 		User:       NewUserClient(cfg),
 	}, nil
 }
@@ -115,6 +120,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Club:       NewClubClient(cfg),
 		Completion: NewCompletionClient(cfg),
 		Genre:      NewGenreClient(cfg),
+		Invitation: NewInvitationClient(cfg),
 		User:       NewUserClient(cfg),
 	}, nil
 }
@@ -149,6 +155,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Club.Use(hooks...)
 	c.Completion.Use(hooks...)
 	c.Genre.Use(hooks...)
+	c.Invitation.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -359,6 +366,22 @@ func (c *ClubClient) QueryMembers(cl *Club) *UserQuery {
 	return query
 }
 
+// QueryInvitations queries the invitations edge of a Club.
+func (c *ClubClient) QueryInvitations(cl *Club) *InvitationQuery {
+	query := &InvitationQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := cl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(club.Table, club.FieldID, id),
+			sqlgraph.To(invitation.Table, invitation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, club.InvitationsTable, club.InvitationsColumn),
+		)
+		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ClubClient) Hooks() []Hook {
 	return c.hooks.Club
@@ -560,6 +583,128 @@ func (c *GenreClient) Hooks() []Hook {
 	return c.hooks.Genre
 }
 
+// InvitationClient is a client for the Invitation schema.
+type InvitationClient struct {
+	config
+}
+
+// NewInvitationClient returns a client for the Invitation from the given config.
+func NewInvitationClient(c config) *InvitationClient {
+	return &InvitationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `invitation.Hooks(f(g(h())))`.
+func (c *InvitationClient) Use(hooks ...Hook) {
+	c.hooks.Invitation = append(c.hooks.Invitation, hooks...)
+}
+
+// Create returns a create builder for Invitation.
+func (c *InvitationClient) Create() *InvitationCreate {
+	mutation := newInvitationMutation(c.config, OpCreate)
+	return &InvitationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Invitation entities.
+func (c *InvitationClient) CreateBulk(builders ...*InvitationCreate) *InvitationCreateBulk {
+	return &InvitationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Invitation.
+func (c *InvitationClient) Update() *InvitationUpdate {
+	mutation := newInvitationMutation(c.config, OpUpdate)
+	return &InvitationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *InvitationClient) UpdateOne(i *Invitation) *InvitationUpdateOne {
+	mutation := newInvitationMutation(c.config, OpUpdateOne, withInvitation(i))
+	return &InvitationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *InvitationClient) UpdateOneID(id uuid.UUID) *InvitationUpdateOne {
+	mutation := newInvitationMutation(c.config, OpUpdateOne, withInvitationID(id))
+	return &InvitationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Invitation.
+func (c *InvitationClient) Delete() *InvitationDelete {
+	mutation := newInvitationMutation(c.config, OpDelete)
+	return &InvitationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *InvitationClient) DeleteOne(i *Invitation) *InvitationDeleteOne {
+	return c.DeleteOneID(i.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *InvitationClient) DeleteOneID(id uuid.UUID) *InvitationDeleteOne {
+	builder := c.Delete().Where(invitation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &InvitationDeleteOne{builder}
+}
+
+// Query returns a query builder for Invitation.
+func (c *InvitationClient) Query() *InvitationQuery {
+	return &InvitationQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Invitation entity by its id.
+func (c *InvitationClient) Get(ctx context.Context, id uuid.UUID) (*Invitation, error) {
+	return c.Query().Where(invitation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *InvitationClient) GetX(ctx context.Context, id uuid.UUID) *Invitation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySponsor queries the sponsor edge of a Invitation.
+func (c *InvitationClient) QuerySponsor(i *Invitation) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(invitation.Table, invitation.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, invitation.SponsorTable, invitation.SponsorColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryClub queries the club edge of a Invitation.
+func (c *InvitationClient) QueryClub(i *Invitation) *ClubQuery {
+	query := &ClubQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := i.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(invitation.Table, invitation.FieldID, id),
+			sqlgraph.To(club.Table, club.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, invitation.ClubTable, invitation.ClubColumn),
+		)
+		fromV = sqlgraph.Neighbors(i.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *InvitationClient) Hooks() []Hook {
+	return c.hooks.Invitation
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -654,6 +799,22 @@ func (c *UserClient) QueryClubs(u *User) *ClubQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(club.Table, club.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.ClubsTable, user.ClubsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryInvitations queries the invitations edge of a User.
+func (c *UserClient) QueryInvitations(u *User) *InvitationQuery {
+	query := &InvitationQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(invitation.Table, invitation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, true, user.InvitationsTable, user.InvitationsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
