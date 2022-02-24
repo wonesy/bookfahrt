@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/session"
@@ -13,6 +14,8 @@ import (
 	"github.com/wonesy/bookfahrt/api"
 	"github.com/wonesy/bookfahrt/ent"
 	"github.com/wonesy/bookfahrt/logging"
+
+	_ "github.com/wonesy/bookfahrt/docs"
 )
 
 func initDb() *ent.Client {
@@ -34,6 +37,12 @@ func initDb() *ent.Client {
 	return client
 }
 
+// @title BookFahrt API
+// @version 0.1.0
+// @description Darn tootin' good book readin'
+// @termsOfService http://swagger.io/terms/
+// @host localhost:4000
+// @BasePath /
 func main() {
 	// init
 	app := fiber.New()
@@ -44,6 +53,7 @@ func main() {
 	logging.InitLoggers()
 
 	// middleware
+	app.Get("/docs/*", swagger.HandlerDefault)
 	app.Use(recover.New())
 
 	// routers

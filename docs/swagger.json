@@ -1,0 +1,13 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Darn tootin' good book readin'",
+        "title": "BookFahrt API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {},
+        "version": "0.1.0"
+    },
+    "host": "localhost:4000",
+    "basePath": "/",
+    "paths": {}
+}

@@ -1,0 +1,10 @@
+basePath: /
+host: localhost:4000
+info:
+  contact: {}
+  description: Darn tootin' good book readin'
+  termsOfService: http://swagger.io/terms/
+  title: BookFahrt API
+  version: 0.1.0
+paths: {}
+swagger: "2.0"
