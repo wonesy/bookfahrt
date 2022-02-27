@@ -8,6 +8,7 @@ import (
 
 	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/session"
 	_ "github.com/lib/pq"
@@ -55,6 +56,7 @@ func main() {
 	// middleware
 	app.Get("/docs/*", swagger.HandlerDefault)
 	app.Use(recover.New())
+	app.Use(cors.New())
 
 	// routers
 	app.Route("/auth", apiEnv.InitAuthRouter())

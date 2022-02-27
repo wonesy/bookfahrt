@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -30,11 +31,13 @@ func (e *ApiEnv) LoginHandler() func(c *fiber.Ctx) error {
 
 		user, err := e.GetUserByUsername(creds.Username)
 		if err != nil {
-			return err
+			return c.Status(fiber.StatusUnauthorized).
+				SendString(fmt.Sprintf("user %s not found", creds.Username))
 		}
 
 		if !auth.PasswordMatchesHash(creds.Password, user.Password) {
-			return errors.New("invalid credentials")
+			return c.Status(fiber.StatusUnauthorized).
+				SendString("invalid credentials")
 		}
 
 		e.Store.RegisterType(ent.User{})
