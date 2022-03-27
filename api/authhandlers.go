@@ -92,7 +92,7 @@ func (e *ApiEnv) RegisterHandler() func(c *fiber.Ctx) error {
 		}
 
 		// no invitation, return without adding to club
-		if userReg.InvitationID == uuid.Nil.String() {
+		if userReg.InvitationID == "" {
 			return c.JSON(newUser)
 		}
 

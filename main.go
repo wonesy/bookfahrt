@@ -47,16 +47,24 @@ func initDb() *ent.Client {
 func main() {
 	// init
 	app := fiber.New()
-	store := session.New()
+	store := session.New(session.Config{
+		CookieSecure:   true,
+		CookieSameSite: "strict",
+	})
 	client := initDb()
 	defer client.Close()
+
 	apiEnv := api.NewApiEnv(client, store)
 	logging.InitLoggers()
 
 	// middleware
 	app.Get("/docs/*", swagger.HandlerDefault)
 	app.Use(recover.New())
-	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:3000",
+		AllowCredentials: true,
+		ExposeHeaders:    "Set-Cookie",
+	}))
 
 	// routers
 	app.Route("/auth", apiEnv.InitAuthRouter())
